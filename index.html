@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>경매 계산기</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1r51_in8C0TKK-OqfrFtSfWw7kyHIO0z1">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 40px 0;
+      height: 100vh;
+      background: url('https://lh3.googleusercontent.com/d/1QsLDDAKaZl-oUm9VPp8sIFFZ1afxss_1') no-repeat center top;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .calculator {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .input-row label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+input[type="number"] {
+  width: 50%;
+  padding: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+  text-align: right; /* 이거 추가! */
+}
+
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .person-btn {
+      flex: 1;
+      padding: 10px;
+      margin: 0 5px;
+      border: 1px solid #333;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .person-btn.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #copyNotice {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      margin-top: 15px;
+      margin-bottom: -5px;
+    }
+
+    .result-box {
+      font-size: 18px;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .result-item {
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .result-item:hover {
+      color: #4CAF50;
+    }
+
+    #popupMessage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      display: none;
+      z-index: 1000;
+      animation: fadeOut 1.2s forwards;
+    }
+
+    @keyframes fadeOut {
+      0% {opacity: 1;}
+      80% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+
+    #expectedShareBox {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h2>경매 계산기</h2>
+
+    <div class="input-row">
+      <label for="price">경매장가:</label>
+      <input type="number" id="price" oninput="calculate()">
+    </div>
+
+    <div class="button-group">
+      <div class="person-btn" onclick="selectPeople(4)">4명</div>
+      <div class="person-btn" onclick="selectPeople(8)">8명</div>
+      <div class="person-btn" onclick="selectPeople(16)">16명</div>
+    </div>
+
+    <div id="copyNotice">🖱️ 클릭 시 복사됩니다 🖱️</div>
+
+    <div class="result-box">
+      <div id="result" class="result-item" onclick="copyText(this)">적정 입찰가: 0골드</div>
+      <div id="justGive" class="result-item" onclick="copyText(this)">그냥 줘: 0골드</div>
+    </div>
+
+    <div id="popupMessage">복사되었습니다!</div>
+
+    <div id="expectedShareBox">예상 분배금: 0골드</div>
+  </div>
+
+  <script>
+    let selectedPeople = 4;
+
+    function selectPeople(num) {
+      selectedPeople = num;
+      document.querySelectorAll('.person-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.textContent) === num) {
+          btn.classList.add('active');
+        }
+      });
+      calculate();
+    }
+
+    function calculate() {
+      const price = parseFloat(document.getElementById('price').value);
+      if (isNaN(price) || selectedPeople <= 0) {
+        document.getElementById('result').innerText = "적정 입찰가: 0골드";
+        document.getElementById('justGive').innerText = "그냥 줘: 0골드";
+        document.getElementById('expectedShareBox').innerText = "예상 분배금: 0골드";
+        return;
+      }
+
+      const baseTotal = (price * 0.95) * (selectedPeople - 1);
+      let bidPrice = baseTotal / selectedPeople;
+
+      if (bidPrice > 100000) {
+        bidPrice = (baseTotal - 5000) / ((selectedPeople - 1) + 0.95);
+      }
+
+      const formattedBid = Math.round(bidPrice).toLocaleString();
+      const justGive = Math.round(bidPrice * 0.9).toLocaleString();
+      const expectedShare = Math.round(price * 0.95 - bidPrice).toLocaleString();
+
+      document.getElementById('result').innerText = `적정 입찰가: ${formattedBid}골드`;
+      document.getElementById('justGive').innerText = `그냥 줘: ${justGive}골드`;
+      document.getElementById('expectedShareBox').innerText = `예상 분배금: ${expectedShare}골드`;
+    }
+
+    function copyText(el) {
+      const valueText = el.innerText.split(": ")[1];
+      const numericOnly = valueText.replace(/[^\d]/g, "");
+      navigator.clipboard.writeText(numericOnly).then(() => {
+        const popup = document.getElementById("popupMessage");
+        popup.style.display = "block";
+        popup.style.animation = "none";
+        void popup.offsetWidth;
+        popup.style.animation = "fadeOut 1.2s forwards";
+        setTimeout(() => {
+          popup.style.display = "none";
+        }, 1200);
+      });
+    }
+
+    window.onload = () => selectPeople(4);
+  </script>
+</body>
+</html>
