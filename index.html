@@ -44,14 +44,13 @@
       margin-right: 10px;
     }
 
-input[type="number"] {
-  width: 50%;
-  padding: 6px;
-  font-size: 16px;
-  box-sizing: border-box;
-  text-align: right; /* 이거 추가! */
-}
-
+    input[type="number"] {
+      width: 50%;
+      padding: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+      text-align: right;
+    }
 
     .button-group {
       display: flex;
@@ -152,7 +151,8 @@ input[type="number"] {
 
     <div class="result-box">
       <div id="result" class="result-item" onclick="copyText(this)">적정 입찰가: 0골드</div>
-      <div id="justGive" class="result-item" onclick="copyText(this)">그냥 줘: 0골드</div>
+      <div id="middleBid" class="result-item" onclick="copyText(this)">나만 이득: 0골드</div>
+      <div id="justGive" class="result-item" onclick="copyText(this)">입찰가 유도: 0골드</div>
     </div>
 
     <div id="popupMessage">복사되었습니다!</div>
@@ -178,7 +178,8 @@ input[type="number"] {
       const price = parseFloat(document.getElementById('price').value);
       if (isNaN(price) || selectedPeople <= 0) {
         document.getElementById('result').innerText = "적정 입찰가: 0골드";
-        document.getElementById('justGive').innerText = "그냥 줘: 0골드";
+        document.getElementById('middleBid').innerText = "나만 이득: 0골드";
+        document.getElementById('justGive').innerText = "입찰가 유도: 0골드";
         document.getElementById('expectedShareBox').innerText = "예상 분배금: 0골드";
         return;
       }
@@ -190,12 +191,14 @@ input[type="number"] {
         bidPrice = (baseTotal - 5000) / ((selectedPeople - 1) + 0.95);
       }
 
+      const middleBid = Math.round(bidPrice * 0.95).toLocaleString();
       const formattedBid = Math.round(bidPrice).toLocaleString();
       const justGive = Math.round(bidPrice * 0.9).toLocaleString();
       const expectedShare = Math.round(price * 0.95 - bidPrice).toLocaleString();
 
       document.getElementById('result').innerText = `적정 입찰가: ${formattedBid}골드`;
-      document.getElementById('justGive').innerText = `그냥 줘: ${justGive}골드`;
+      document.getElementById('middleBid').innerText = `나만 이득: ${middleBid}골드`;
+      document.getElementById('justGive').innerText = `입찰가 유도: ${justGive}골드`;
       document.getElementById('expectedShareBox').innerText = `예상 분배금: ${expectedShare}골드`;
     }
 
